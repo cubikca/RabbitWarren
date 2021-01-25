@@ -18,7 +18,7 @@ namespace RabbitWarren
     /// </remarks>
     public class RabbitMQConnection : IDisposable
     {
-        private readonly ILifetimeScope _container;
+        private readonly IContainer _container;
 
         /// <summary>
         ///     Create a connection to RabbitMQ.
@@ -26,7 +26,7 @@ namespace RabbitWarren
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="container"></param>
-        public RabbitMQConnection(IConnection connection, ILifetimeScope container)
+        public RabbitMQConnection(IConnection connection, IContainer container)
         {
             Connection = connection;
             // IMPORTANT: you need to lock this list before using it

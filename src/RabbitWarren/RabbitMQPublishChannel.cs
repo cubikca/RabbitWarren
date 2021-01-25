@@ -26,7 +26,7 @@ namespace RabbitWarren
 
         private Task<ReadOnlyMemory<byte>> SerializeBody(ISerializable message)
         {
-            var jsonSettings = new JsonSerializerSettings {PreserveReferencesHandling = PreserveReferencesHandling.Objects};
+            var jsonSettings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
             using (var ms = new MemoryStream())
             using (var writer = new JsonTextWriter(new StreamWriter(ms)))
             {
@@ -83,7 +83,6 @@ namespace RabbitWarren
                 var consumer = consumerChannel.RegisterDefaultConsumer();
                 consumer.Start(consumerChannel.Exclusive, consumerChannel.AutoDelete);
             }
-
             await Publish(message, queue, replyTo);
             var result = await Connection.Responses[message.Id].Task;
             return result;

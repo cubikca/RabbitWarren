@@ -14,16 +14,16 @@ namespace RabbitWarren
     ///     A consumer for the specified message type
     /// </summary>
     /// <typeparam name="T">An IMessage type to consume</typeparam>
-    public class RabbitMQConsumer : EventingBasicConsumer, IDisposable
+    public class RabbitMQConsumer : AsyncEventingBasicConsumer, IDisposable
     {
-        private readonly ILifetimeScope _container;
+        private readonly IContainer _container;
 
         /// <summary>
         ///     Construct a consumer for the specified channel
         /// </summary>
         /// <param name="channel">The associated channel for this consumer</param>
         /// <param name="container">The AutoFac container for registering MediatR handlers</param>
-        public RabbitMQConsumer(RabbitMQConsumerChannel channel, ILifetimeScope container) : base(channel.Model)
+        public RabbitMQConsumer(RabbitMQConsumerChannel channel, IContainer container) : base(channel.Model)
         {
             Channel = channel;
             _container = container;
@@ -53,7 +53,7 @@ namespace RabbitWarren
             Stop();
         }
 
-        private void RabbitMQConsumer_Received(object sender, BasicDeliverEventArgs @event)
+        private async Task RabbitMQConsumer_Received(object sender, BasicDeliverEventArgs @event)
         {
             lock (Model)
             {
@@ -67,9 +67,9 @@ namespace RabbitWarren
             // reply_to will be set if the incoming message is a request
             var replyTo = @event.BasicProperties.ReplyTo;
             if (replyTo != null)
-                ProcessRequest(@event.Body, type, replyTo).GetAwaiter().GetResult();
+                await ProcessRequest(@event.Body, type, replyTo);
             else
-                ProcessResponse(@event.Body, type).GetAwaiter().GetResult();
+                await ProcessResponse(@event.Body, type);
         }
 
         private async Task<Message> ProcessRequest(ReadOnlyMemory<byte> body, Type type, string replyTo)
@@ -77,7 +77,8 @@ namespace RabbitWarren
             using (var ms = new MemoryStream(body.ToArray()))
             using (var reader = new JsonTextReader(new StreamReader(ms)))
             {
-                var serializer = new JsonSerializer();
+                var serializerSettings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
+                var serializer = JsonSerializer.Create(serializerSettings);
                 var message = (Message) serializer.Deserialize(reader, type);
                 Message response;
                 try
@@ -102,7 +103,7 @@ namespace RabbitWarren
 
         private Task ProcessResponse(ReadOnlyMemory<byte> body, Type type)
         {
-            var jsonSettings = new JsonSerializerSettings {PreserveReferencesHandling = PreserveReferencesHandling.Objects};
+            var jsonSettings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
             using (var ms = new MemoryStream(body.ToArray()))
             using (var reader = new JsonTextReader(new StreamReader(ms)))
             {

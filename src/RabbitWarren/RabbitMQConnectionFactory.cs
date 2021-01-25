@@ -28,7 +28,7 @@ namespace RabbitWarren
     public class RabbitMQConnectionFactory
     {
         private readonly IConnectionFactory _connectionFactory;
-        private readonly ILifetimeScope _container;
+        public IContainer ServiceContainer { get; set; }
 
         /// <summary>
         ///     Create a connection factory given the provided connection parameters
@@ -44,7 +44,7 @@ namespace RabbitWarren
         /// <param name="container">The AutoFac container for MediatR handler registration</param>
         /// <param name="username">The connection username (not required if using external authentication)</param>
         /// <param name="password">The connection password (not required if using external authentication)</param>
-        public RabbitMQConnectionFactory(RabbitMQProtocol protocol, string host, string vhost, int port, X509Certificate2 cert, ILifetimeScope container,
+        public RabbitMQConnectionFactory(RabbitMQProtocol protocol, string host, string vhost, int port, X509Certificate2 cert, IContainer container,
             string username = null, string password = null)
         {
             var scheme = "amqp";
@@ -77,10 +77,12 @@ namespace RabbitWarren
                 VirtualHost = vhost,
                 UserName = username,
                 Password = password,
+                Port = port,
                 Ssl = sslOption ?? new SslOption {Enabled = false},
-                AuthMechanisms = authMechanisms
+                AuthMechanisms = authMechanisms,
+                DispatchConsumersAsync = true
             };
-            _container = container;
+            ServiceContainer = container;
         }
 
         /// <summary>
@@ -90,7 +92,7 @@ namespace RabbitWarren
         public RabbitMQConnection Create()
         {
             var connection = _connectionFactory.CreateConnection();
-            return new RabbitMQConnection(connection, _container);
+            return new RabbitMQConnection(connection, ServiceContainer);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace RabbitWarren.ClientHandlers
             _mqOptions = mqOptions;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
+        public virtual async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
         {
             
             TResponse response;

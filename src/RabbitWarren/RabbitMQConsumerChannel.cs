@@ -13,7 +13,7 @@ namespace RabbitWarren
     /// <typeparam name="T"></typeparam>
     public class RabbitMQConsumerChannel : RabbitMQChannel
     {
-        private readonly ILifetimeScope _container;
+        private readonly IContainer _container;
 
         /// <summary>
         ///     The default response processing handler
@@ -41,7 +41,7 @@ namespace RabbitWarren
         /// <param name="queue">The associated RabbitMQ queue</param>
         /// <param name="autoDelete">True if the underlying queue should be deleted when the channel is closed</param>
         /// <param name="exclusive">True if access to the underlying queue should be restricted to the channel</param>
-        public RabbitMQConsumerChannel(RabbitMQConnection connection, ILifetimeScope container, string exchange, string queue, bool autoDelete = false,
+        public RabbitMQConsumerChannel(RabbitMQConnection connection, IContainer container, string exchange, string queue, bool autoDelete = false,
             bool exclusive = true) : base(connection, exchange)
         {
             _container = container;

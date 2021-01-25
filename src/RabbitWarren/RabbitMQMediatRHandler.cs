@@ -31,7 +31,7 @@ namespace RabbitWarren
     public class RabbitMQMediatRHandler : IRabbitMQMessageHandler
     {
         private readonly RabbitMQConnection _connection;
-        private readonly ILifetimeScope _container;
+        private readonly IContainer _container;
         private readonly Assembly _handlerAssembly;
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace RabbitWarren
         /// <param name="consumer">The consumer who owns this handler</param>
         /// <param name="container">The AutoFac container for registering MediatR handlers</param>
         /// <param name="handlerAssembly">The assembly containing MediatR handlers</param>
-        public RabbitMQMediatRHandler(RabbitMQConsumer consumer, ILifetimeScope container, Assembly handlerAssembly)
+        public RabbitMQMediatRHandler(RabbitMQConsumer consumer, IContainer container, Assembly handlerAssembly)
         {
             _connection = consumer.Channel.Connection;
             Consumer = consumer;
